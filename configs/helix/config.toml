@@ -1,0 +1,27 @@
+theme = "tokyonight_moon"
+
+[editor]
+cursorline = true
+default-yank-register = "+"
+# [editor.clipboard-provider]
+clipboard-provider = "wayland"
+[editor.statusline]
+left = ["mode", "spinner"]
+center = ["file-name", "read-only-indicator"]
+separator = "|"
+
+[editor.cursor-shape]
+insert = "bar"
+
+# [editor.auto-save]
+# after-delay.enable = true
+# after-delay.timeout = 3000
+
+[keys.normal]
+home = "goto_first_nonwhitespace"
+
+[keys.insert]
+home = "goto_first_nonwhitespace"
+
+[keys.select]
+home = "extend_to_first_nonwhitespace"

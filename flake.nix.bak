@@ -1,0 +1,33 @@
+{
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    brain-shell = {
+      url = "github:Brainitech/Brain_Shell?ref=main";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    zen-browser = {
+      url = "github:0xc000022070/zen-browser-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    silentSDDM = {
+      url = "github:uiriansan/SilentSDDM";
+      inputs.nixpkgs.follows = "nixpkgs";
+   };
+  };
+
+  outputs = { nixpkgs, brain-shell, zen-browser, ... }@inputs: {
+    imports = [inputs.silentSDDM.nixosModules.default];
+    programs.silentSDDM = {
+        enable = true;
+        theme = "silvia";
+        # settings = { ... }; see example in module
+    };
+    nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
+      specialArgs = { inherit inputs; };
+      modules = [
+        brain-shell.nixosModules.default
+        ./configuration.nix
+      ];
+    };
+  };
+}

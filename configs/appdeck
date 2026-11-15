@@ -1,0 +1,52 @@
+#!/nix/store/1iswwfnahq2h99qanw41x4znhsxls2aq-appdeck-runtime/bin/bash
+set -euo pipefail
+RUNTIME=/home/snezhinka/.local/share/appdeck/runtime
+CONFIG=/home/snezhinka/.config/quickshell/tui
+STATE=/home/snezhinka/.local/state/appdeck
+export PATH="$RUNTIME/bin:$HOME/.nix-profile/bin:/etc/profiles/per-user/$USER/bin:/run/current-system/sw/bin:${PATH:-}"
+# Preserve session application discovery, adding NixOS locations for minimal bind environments.
+export XDG_DATA_DIRS="${XDG_DATA_DIRS:-/usr/local/share:/usr/share}:$HOME/.nix-profile/share:/etc/profiles/per-user/$USER/share:/run/current-system/sw/share:$RUNTIME/share"
+QS=$RUNTIME/bin/qs
+mkdir -p "$STATE"
+LOG=$STATE/launcher.log
+running() { "$QS" -c tui ipc show >/dev/null 2>&1; }
+start_shell() {
+    running && return 0
+    [[ -n ${WAYLAND_DISPLAY:-} && -n ${XDG_RUNTIME_DIR:-} ]] || {
+        echo 'Start AppDeck from inside your Wayland desktop session.' >&2; return 1;
+    }
+    # Serialize simultaneous first key presses. Quickshell handles its own daemonization.
+    exec 9>"$XDG_RUNTIME_DIR/appdeck-start.lock"
+    flock -w 15 9 || return 1
+    if ! running; then
+        if ! "$QS" -n -d -c tui >"$LOG" 2>&1 9>&-; then
+            echo "Quickshell startup failed. See $LOG or run: $0 debug" >&2
+            flock -u 9; return 1
+        fi
+        for ((i=0; i<100; i++)); do
+            if running; then flock -u 9; return 0; fi
+            sleep 0.05
+        done
+        echo "AppDeck IPC did not become ready. See $LOG or run: $0 debug" >&2
+        flock -u 9; return 1
+    fi
+    flock -u 9
+}
+case ${1:-open} in
+    open|toggle)
+        action=apps
+        [[ ${1:-open} == toggle ]] && action=toggle
+        # One IPC round trip when warm. A startup check is only needed on failure.
+        if ! "$QS" -c tui ipc call command "$action" 2>/dev/null; then
+            start_shell
+            "$QS" -c tui ipc call command "$action"
+        fi ;;
+    start) start_shell ;;
+    close) if running; then "$QS" -c tui ipc call command close; fi ;;
+    stop) if running; then "$QS" -c tui kill; fi ;;
+    restart) "$0" stop; start_shell ;;
+    status) if running; then echo 'AppDeck is running.'; else echo 'AppDeck is stopped.'; exit 1; fi ;;
+    log) cat "$LOG" ;;
+    debug) exec "$QS" -c tui ;;
+    *) echo 'Usage: appdeck [open|toggle|close|start|stop|restart|status|log|debug]' >&2; exit 2 ;;
+esac

@@ -1,0 +1,26 @@
+{
+  "dashboard-kanban": {
+    "mods": "SUPER + SHIFT",
+    "key": "Z"
+  },
+  "dashboard-launcher": {
+    "mods": "SUPER + SHIFT",
+    "key": "Q"
+  },
+  "dashboard-config": {
+    "mods": "SUPER + SHIFT",
+    "key": "K"
+  },
+  "clipboard-toggle": {
+    "mods": "SUPER + SHIFT",
+    "key": "C"
+  },
+  "audioOut-toggle": {
+    "mods": "SUPER + SHIFT",
+    "key": "A"
+  },
+  "audioMix-toggle": {
+    "mods": "SUPER + SHIFT",
+    "key": "M"
+  }
+}

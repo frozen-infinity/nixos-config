@@ -1,0 +1,33 @@
+[[language]]
+name = "cpp"
+language-servers = ["clangd"]
+# formatter = { command = "clang" }
+indent = { tab-width = 4, unit = "    " }
+
+[language-server.pyright]
+command = "pyright-langserver"
+args = ["--stdio"]
+
+[language-server.ruff]
+command = "ruff"
+args = ["server"]
+
+[[language]]
+name = "python"
+language-servers = ["pyright", "ruff"]
+
+[language-server.nixd]
+command = "nixd"
+
+[language-server.nixd.config.nixd]
+formatting.command = ["nixfmt"]
+
+[[language]]
+name = "nix"
+language-servers = ["nixd"]
+auto-format = true
+indent = { tab-width = 4, unit = "    " }
+
+
+[language-server.pyright.config.python.analysis]
+typeCheckingMode = "basic"
