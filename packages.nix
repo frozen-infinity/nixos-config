@@ -22,6 +22,7 @@
     nautilus
     bibata-cursors
     starship
+    cl-wordle
     clang
     gcc
     chatgpt
